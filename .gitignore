@@ -1,0 +1,26 @@
+# Datasets - too large for GitHub
+data/raw/
+data/processed/
+data/collected/
+
+# Trained model weights - too large for GitHub
+saved_models/
+
+# Python environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Mac system files
+.DS_Store
+
+# Logs
+reports/training_logs/
+
+# Zip files
+*.zip
