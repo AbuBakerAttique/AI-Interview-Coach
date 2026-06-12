@@ -1,114 +1,96 @@
 """
 Speech Confidence Model — CNN + LSTM Architecture (From Scratch)
 Input: MFCC features (200, 40)
-Output: 3 classes — nervous, neutral, confident
+Output: 3 classes — nervous(0), neutral(1), confident(2)
 """
 
-import tensorflow as tf
-from tensorflow.keras import layers, models, regularizers
+import torch
+import torch.nn as nn
 
 
-def build_speech_cnn_lstm(
-    input_shape: tuple = (200, 40),
-    num_classes: int = 3,
-    dropout_rate: float = 0.4
-) -> tf.keras.Model:
+class SpeechConfidenceModel(nn.Module):
     """
-    Custom CNN + LSTM architecture for speech confidence classification.
+    Custom CNN + LSTM for speech confidence classification.
     Built 100% from scratch — no pretrained weights.
 
     Architecture:
         Input → Conv1D (x3) → LSTM → Dense → Output
-
-    Args:
-        input_shape: (time_steps, n_mfcc) = (200, 40)
-        num_classes: 3 (nervous, neutral, confident)
-        dropout_rate: Dropout probability
-
-    Returns:
-        Compiled Keras model
     """
-    inputs = tf.keras.Input(shape=input_shape, name="mfcc_input")
 
-    # --- CNN Block 1 ---
-    x = layers.Conv1D(64, kernel_size=3, padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling1D(pool_size=2)(x)
-    x = layers.Dropout(dropout_rate)(x)
+    def __init__(self, num_classes: int = 3, dropout_rate: float = 0.4):
+        super(SpeechConfidenceModel, self).__init__()
 
-    # --- CNN Block 2 ---
-    x = layers.Conv1D(128, kernel_size=3, padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling1D(pool_size=2)(x)
-    x = layers.Dropout(dropout_rate)(x)
+        # --- CNN Block 1 ---
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(40, 64, kernel_size=3, padding=1),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(dropout_rate)
+        )
 
-    # --- CNN Block 3 ---
-    x = layers.Conv1D(256, kernel_size=3, padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling1D(pool_size=2)(x)
-    x = layers.Dropout(dropout_rate)(x)
+        # --- CNN Block 2 ---
+        self.conv2 = nn.Sequential(
+            nn.Conv1d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(dropout_rate)
+        )
 
-    # --- LSTM Block ---
-    x = layers.LSTM(128, return_sequences=True)(x)
-    x = layers.LSTM(64, return_sequences=False)(x)
-    x = layers.Dropout(dropout_rate)(x)
+        # --- CNN Block 3 ---
+        self.conv3 = nn.Sequential(
+            nn.Conv1d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(dropout_rate)
+        )
 
-    # --- Dense Head ---
-    x = layers.Dense(128, activation="relu")(x)
-    x = layers.Dropout(dropout_rate)(x)
-    x = layers.Dense(64, activation="relu")(x)
+        # --- LSTM Block ---
+        self.lstm = nn.LSTM(
+            input_size=256,
+            hidden_size=128,
+            num_layers=2,
+            batch_first=True,
+            dropout=dropout_rate
+        )
 
-    # --- Output ---
-    outputs = layers.Dense(num_classes, activation="softmax", name="confidence_output")(x)
+        # --- Dense Head ---
+        self.classifier = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(64, num_classes)
+        )
 
-    model = models.Model(inputs=inputs, outputs=outputs, name="SpeechConfidenceCNN_LSTM")
+    def forward(self, x):
+        # x shape: (batch, time_steps, n_mfcc) = (batch, 200, 40)
+        x = x.permute(0, 2, 1)   # → (batch, 40, 200) for Conv1d
 
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"]
-    )
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
 
-    return model
+        x = x.permute(0, 2, 1)   # → (batch, time, channels) for LSTM
+
+        x, _ = self.lstm(x)
+        x = x[:, -1, :]          # Take last time step
+
+        x = self.classifier(x)
+        return x
 
 
-def build_speech_pure_cnn(
-    input_shape: tuple = (200, 40),
-    num_classes: int = 3,
-) -> tf.keras.Model:
-    """
-    Alternative: Pure CNN (faster, good baseline to compare with CNN+LSTM)
-    """
-    inputs = tf.keras.Input(shape=input_shape, name="mfcc_input")
-
-    x = layers.Conv1D(32, 3, padding="same", activation="relu")(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling1D(2)(x)
-
-    x = layers.Conv1D(64, 3, padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling1D(2)(x)
-
-    x = layers.Conv1D(128, 3, padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.GlobalAveragePooling1D()(x)
-
-    x = layers.Dense(128, activation="relu")(x)
-    x = layers.Dropout(0.4)(x)
-    outputs = layers.Dense(num_classes, activation="softmax")(x)
-
-    model = models.Model(inputs=inputs, outputs=outputs, name="SpeechConfidenceCNN")
-    model.compile(
-        optimizer="adam",
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"]
-    )
+def build_speech_model(num_classes: int = 3) -> SpeechConfidenceModel:
+    model = SpeechConfidenceModel(num_classes=num_classes)
     return model
 
 
 if __name__ == "__main__":
-    model = build_speech_cnn_lstm()
-    model.summary()
+    model = build_speech_model()
+    print(model)
+
+    # Test with dummy input
+    dummy = torch.randn(8, 200, 40)   # batch=8, time=200, mfcc=40
+    output = model(dummy)
+    print(f"Output shape: {output.shape}")  # Should be (8, 3)

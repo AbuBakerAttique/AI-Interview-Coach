@@ -1,84 +1,101 @@
 """
 Facial Expression Model — Custom CNN Architecture (From Scratch)
 Input: 48x48 grayscale face images
-Output: 3 classes — nervous, neutral, confident
+Output: 3 classes — nervous(0), neutral(1), confident(2)
 """
 
-import tensorflow as tf
-from tensorflow.keras import layers, models, regularizers
+import torch
+import torch.nn as nn
 
 
-def build_face_cnn(
-    input_shape: tuple = (48, 48, 1),
-    num_classes: int = 3,
-    dropout_rate: float = 0.5
-) -> tf.keras.Model:
+class FacialExpressionModel(nn.Module):
     """
-    Custom CNN for facial expression → interview state classification.
-    Architecture built from scratch. No VGG, no ResNet, no transfer learning.
+    Custom CNN for facial expression classification.
+    Built 100% from scratch — no pretrained weights, no VGG, no ResNet.
 
     Architecture:
-        Input → Conv2D Block (x4) → Flatten → Dense → Output
-
-    Args:
-        input_shape: (height, width, channels) = (48, 48, 1)
-        num_classes: 3 (nervous, neutral, confident)
-        dropout_rate: Dropout probability
-
-    Returns:
-        Compiled Keras model
+        Input → Conv2D Block (x4) → Global Average Pool → Dense → Output
     """
-    inputs = tf.keras.Input(shape=input_shape, name="face_input")
 
-    # --- Conv Block 1 ---
-    x = layers.Conv2D(32, (3, 3), padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(inputs)
-    x = layers.Conv2D(32, (3, 3), padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
+    def __init__(self, num_classes: int = 3, dropout_rate: float = 0.5):
+        super(FacialExpressionModel, self).__init__()
 
-    # --- Conv Block 2 ---
-    x = layers.Conv2D(64, (3, 3), padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(x)
-    x = layers.Conv2D(64, (3, 3), padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
+        # --- Conv Block 1 ---
+        self.block1 = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Dropout2d(0.25)
+        )
 
-    # --- Conv Block 3 ---
-    x = layers.Conv2D(128, (3, 3), padding="same", activation="relu",
-                      kernel_regularizer=regularizers.l2(1e-4))(x)
-    x = layers.Conv2D(128, (3, 3), padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
+        # --- Conv Block 2 ---
+        self.block2 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Dropout2d(0.25)
+        )
 
-    # --- Conv Block 4 ---
-    x = layers.Conv2D(256, (3, 3), padding="same", activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.GlobalAveragePooling2D()(x)
+        # --- Conv Block 3 ---
+        self.block3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Dropout2d(0.25)
+        )
 
-    # --- Dense Head ---
-    x = layers.Dense(512, activation="relu")(x)
-    x = layers.Dropout(dropout_rate)(x)
-    x = layers.Dense(256, activation="relu")(x)
-    x = layers.Dropout(dropout_rate)(x)
+        # --- Conv Block 4 ---
+        self.block4 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+        )
 
-    # --- Output ---
-    outputs = layers.Dense(num_classes, activation="softmax", name="expression_output")(x)
+        # Global Average Pooling
+        self.global_avg_pool = nn.AdaptiveAvgPool2d(1)
 
-    model = models.Model(inputs=inputs, outputs=outputs, name="FacialExpressionCNN")
+        # --- Dense Head ---
+        self.classifier = nn.Sequential(
+            nn.Linear(256, 512),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(256, num_classes)
+        )
 
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"]
-    )
+    def forward(self, x):
+        # x shape: (batch, 1, 48, 48)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.block4(x)
+        x = self.global_avg_pool(x)
+        x = x.view(x.size(0), -1)  # Flatten
+        x = self.classifier(x)
+        return x
 
+
+def build_face_model(num_classes: int = 3) -> FacialExpressionModel:
+    model = FacialExpressionModel(num_classes=num_classes)
     return model
 
 
 if __name__ == "__main__":
-    model = build_face_cnn()
-    model.summary()
+    model = build_face_model()
+    print(model)
+
+    # Test with dummy input
+    dummy = torch.randn(8, 1, 48, 48)   # batch=8, channels=1, 48x48
+    output = model(dummy)
+    print(f"Output shape: {output.shape}")  # Should be (8, 3)

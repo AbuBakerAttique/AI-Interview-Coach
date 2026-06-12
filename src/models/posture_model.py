@@ -1,11 +1,11 @@
 """
 Posture Scorer Model — Neural Network on MediaPipe Landmarks (From Scratch)
-Input: 99 features (33 landmarks × [x, y, z])
+Input: 99 features (33 landmarks x [x, y, z])
 Output: 5 posture classes
 """
 
-import tensorflow as tf
-from tensorflow.keras import layers, models, regularizers
+import torch
+import torch.nn as nn
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -13,68 +13,57 @@ from sklearn.model_selection import train_test_split
 
 
 POSTURE_CLASSES = ["good_posture", "slouching", "crossed_arms", "leaning_back", "looking_down"]
-INPUT_DIM = 99  # 33 landmarks × 3 (x, y, z)
+INPUT_DIM = 99  # 33 landmarks x 3 (x, y, z)
 
 
-def build_posture_nn(
-    input_dim: int = INPUT_DIM,
-    num_classes: int = 5,
-    dropout_rate: float = 0.4
-) -> tf.keras.Model:
+class PostureModel(nn.Module):
     """
     Feedforward Neural Network for posture classification.
     Trained on MediaPipe pose landmark coordinates.
     Built from scratch.
-
-    Args:
-        input_dim: Number of input features (99)
-        num_classes: 5 posture classes
-        dropout_rate: Dropout probability
-
-    Returns:
-        Compiled Keras model
     """
-    inputs = tf.keras.Input(shape=(input_dim,), name="landmark_input")
 
-    # --- Hidden Layer 1 ---
-    x = layers.Dense(256, activation="relu",
-                     kernel_regularizer=regularizers.l2(1e-4))(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(dropout_rate)(x)
+    def __init__(self, input_dim: int = INPUT_DIM, num_classes: int = 5, dropout_rate: float = 0.4):
+        super(PostureModel, self).__init__()
 
-    # --- Hidden Layer 2 ---
-    x = layers.Dense(128, activation="relu",
-                     kernel_regularizer=regularizers.l2(1e-4))(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(dropout_rate)(x)
+        self.network = nn.Sequential(
+            # --- Hidden Layer 1 ---
+            nn.Linear(input_dim, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
 
-    # --- Hidden Layer 3 ---
-    x = layers.Dense(64, activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(dropout_rate)(x)
+            # --- Hidden Layer 2 ---
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
 
-    # --- Hidden Layer 4 ---
-    x = layers.Dense(32, activation="relu")(x)
+            # --- Hidden Layer 3 ---
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
 
-    # --- Output ---
-    outputs = layers.Dense(num_classes, activation="softmax", name="posture_output")(x)
+            # --- Hidden Layer 4 ---
+            nn.Linear(64, 32),
+            nn.ReLU(),
 
-    model = models.Model(inputs=inputs, outputs=outputs, name="PostureNN")
+            # --- Output ---
+            nn.Linear(32, num_classes)
+        )
 
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"]
-    )
+    def forward(self, x):
+        return self.network(x)
 
+
+def build_posture_model(input_dim: int = INPUT_DIM, num_classes: int = 5) -> PostureModel:
+    model = PostureModel(input_dim=input_dim, num_classes=num_classes)
     return model
 
 
 def load_posture_dataset(csv_path: str):
-    """
-    Load self-collected posture dataset from CSV.
-    Returns train/val splits.
-    """
+    """Load self-collected posture dataset from CSV."""
     df = pd.read_csv(csv_path)
 
     X = df.drop("label", axis=1).values.astype(np.float32)
@@ -94,5 +83,10 @@ def load_posture_dataset(csv_path: str):
 
 
 if __name__ == "__main__":
-    model = build_posture_nn()
-    model.summary()
+    model = build_posture_model()
+    print(model)
+
+    # Test with dummy input
+    dummy = torch.randn(8, 99)   # batch=8, 99 landmark features
+    output = model(dummy)
+    print(f"Output shape: {output.shape}")  # Should be (8, 5)
