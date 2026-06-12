@@ -63,11 +63,16 @@ def build_posture_model(input_dim: int = INPUT_DIM, num_classes: int = 5) -> Pos
 
 
 def load_posture_dataset(csv_path: str):
-    """Load self-collected posture dataset from CSV."""
+    """
+    Load MultiPosture dataset from CSV.
+    Uses upperbody_label as target — most relevant for interview posture.
+    Drops: subject, lowerbody_label columns.
+    """
     df = pd.read_csv(csv_path)
 
-    X = df.drop("label", axis=1).values.astype(np.float32)
-    y_raw = df["label"].values
+    # Drop non-feature columns
+    X = df.drop(columns=["subject", "upperbody_label", "lowerbody_label"]).values.astype(np.float32)
+    y_raw = df["upperbody_label"].values
 
     le = LabelEncoder()
     y = le.fit_transform(y_raw)
@@ -78,6 +83,7 @@ def load_posture_dataset(csv_path: str):
 
     print(f"Train: {X_train.shape}, Val: {X_val.shape}")
     print(f"Classes: {le.classes_}")
+    print(f"Class distribution: {np.bincount(y)}")
 
     return X_train, X_val, y_train, y_val, le
 

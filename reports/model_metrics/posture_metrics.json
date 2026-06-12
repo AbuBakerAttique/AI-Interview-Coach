@@ -1,0 +1,11 @@
+{
+  "best_val_accuracy": 0.97288842544317,
+  "epochs_trained": 100,
+  "classes": [
+    "TLB",
+    "TLF",
+    "TLL",
+    "TLR",
+    "TUP"
+  ]
+}
