@@ -1,0 +1,9 @@
+{
+  "best_val_accuracy": 0.7554206418039896,
+  "epochs_trained": 50,
+  "classes": [
+    "nervous",
+    "neutral",
+    "confident"
+  ]
+}
