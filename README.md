@@ -23,9 +23,9 @@ This project demonstrates end-to-end AI engineering: from raw dataset processing
 
 ## System Architecture
 <img src="assets/architecture_diagram.png" width="49%"/>
-```
 
----
+
+
 
 ## Model Performance
 
