@@ -24,35 +24,6 @@ This project demonstrates end-to-end AI engineering: from raw dataset processing
 ## System Architecture
 <img src="assets/architecture_diagram.png" width="49%"/>
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      LIVE INPUT                              │
-│              Webcam + Microphone                             │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │               │
-        ▼               ▼               ▼               ▼
-  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-  │  AUDIO   │   │  FACE    │   │  POSE    │   │   IRIS   │
-  │  MFCC    │   │  CNN     │   │ MediaPipe│   │  Gaze    │
-  │ CNN+LSTM │   │ (scratch)│   │    NN    │   │ Geometry │
-  └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
-       │              │              │               │
-       ▼              ▼              ▼               ▼
-   Speech(30%)   Face(25%)    Posture(25%)   EyeContact(20%)
-        │              │              │               │
-        └──────────────┴──────────────┴───────────────┘
-                                │
-                    ┌───────────▼───────────┐
-                    │   Score Fusion Layer   │
-                    │   + SHAP Explainability│
-                    └───────────┬───────────┘
-                                │
-                    ┌───────────▼───────────┐
-                    │  Final Score (0-100)   │
-                    │  Grade + Feedback      │
-                    └───────────────────────┘
-```
 
 ---
 
