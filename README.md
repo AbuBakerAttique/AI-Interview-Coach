@@ -1,5 +1,8 @@
 # AI Interview Coach 🎯
-
+<p align="center">
+  <img src="assets/arch_diagram.png" width="49%"/>
+  <img src="assets/flow_diagram.png" width="49%"/>
+</p>
 > A real-time, multi-modal AI system that analyzes interview performance using four custom-trained deep learning models — evaluating speech confidence, facial expressions, body posture, and eye contact simultaneously.
 
 ---
