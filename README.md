@@ -17,8 +17,8 @@ This project demonstrates end-to-end AI engineering: from raw dataset processing
 
 ## Demo
 
-> *[Add GIF or screenshot of the live system here]*
 
+ <img src="assets/app_mockup.png" width="49%"/>
 ---
 
 ## System Architecture
