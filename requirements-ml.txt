@@ -5,7 +5,7 @@ torchaudio>=2.0.0
 
 # Computer Vision & Pose Detection
 opencv-python>=4.8.0
-mediapipe>=0.10.0
+mediapipe==0.10.9
 
 # Audio Processing
 librosa>=0.10.0

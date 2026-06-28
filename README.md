@@ -175,10 +175,15 @@ This repository includes a Streamlit-ready hosted showcase entry point:
 streamlit run streamlit_app.py
 ```
 
-The deployed app includes a **Model Test Lab** where visitors can upload a face
-image and run the trained facial-expression model from
-`saved_models/facial_expression/face_model.pth`. The saved speech, face, and
-posture PyTorch weights are included in `saved_models/`.
+The deployed app includes a **Live Interview Session** powered by WebRTC. Visitors
+can grant browser camera/microphone access, start a session, receive live face,
+posture, eye-contact, speech-confidence, and combined-score overlays, then stop the
+session to see the fused score breakdown and feedback. A smaller **Snapshot Test Lab** remains available
+for one-frame face-model checks.
+
+For the native desktop real-time flow, run `python src/inference/real_time_analyzer.py`;
+it uses OpenCV windows for webcam/microphone analysis and prints the combined
+session score and feedback when the session ends.
 
 For Streamlit Community Cloud:
 

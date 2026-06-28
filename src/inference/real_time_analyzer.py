@@ -20,6 +20,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.models.speech_model import build_speech_model
 from src.models.face_model import build_face_model
+from src.models.posture_model import POSTURE_CLASSES as DEFAULT_POSTURE_CLASSES
 from src.models.posture_model import build_posture_model
 from src.models.eye_contact import EyeContactDetector
 from src.inference.score_calculator import ScoreCalculator, FrameScores
@@ -33,7 +34,6 @@ N_MFCC   = 40
 MAX_LEN  = 200
 IMG_SIZE = 48
 
-POSTURE_CLASSES = ['TLB', 'TLF', 'TLL', 'TLR', 'TUP']
 POSTURE_LABELS  = {
     'TUP': 'good_posture',
     'TLF': 'slouching',
@@ -74,10 +74,16 @@ def load_face_model():
 
 def load_posture_model():
     checkpoint = torch.load(POSTURE_MODEL_PATH, map_location="cpu", weights_only=False)
-    model = build_posture_model(input_dim=99, num_classes=5)
-    model.load_state_dict(checkpoint["model_state_dict"])
+    state_dict = checkpoint.get("model_state_dict", checkpoint) if isinstance(checkpoint, dict) else checkpoint
+    label_classes = checkpoint.get("label_encoder_classes") if isinstance(checkpoint, dict) else None
+    input_dim = checkpoint.get("input_dim", 99) if isinstance(checkpoint, dict) else 99
+    fallback_class_count = len(label_classes) if label_classes is not None else len(DEFAULT_POSTURE_CLASSES)
+    num_classes = checkpoint.get("num_classes", fallback_class_count) if isinstance(checkpoint, dict) else 5
+
+    model = build_posture_model(input_dim=input_dim, num_classes=num_classes)
+    model.load_state_dict(state_dict)
     model.eval()
-    return model
+    return model, list(label_classes) if label_classes is not None else DEFAULT_POSTURE_CLASSES
 
 
 # ─── Audio Thread ─────────────────────────────────────────────────────────────
@@ -142,7 +148,7 @@ class RealTimeAnalyzer:
         print("Loading models...")
         self.speech_model  = load_speech_model()
         self.face_model    = load_face_model()
-        self.posture_model = load_posture_model()
+        self.posture_model, self.posture_classes = load_posture_model()
         self.eye_detector  = EyeContactDetector()
         self.score_calc    = ScoreCalculator()
         print("All models loaded!\n")
@@ -210,8 +216,8 @@ class RealTimeAnalyzer:
             pred   = int(probs.argmax())
             conf   = float(probs.max())
 
-        posture_code  = POSTURE_CLASSES[pred]
-        posture_label = POSTURE_LABELS.get(posture_code, "unknown")
+        posture_code  = self.posture_classes[pred]
+        posture_label = POSTURE_LABELS.get(posture_code, posture_code)
         return posture_label, conf
 
     def draw_overlay(self, frame, face_class, face_conf, posture_label, eye_result):

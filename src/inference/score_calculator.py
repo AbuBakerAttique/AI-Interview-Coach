@@ -22,6 +22,8 @@ FACE_CLASS_SCORES    = {0: 20, 1: 60, 2: 100}
 POSTURE_CLASS_SCORES = {
     "good_posture":  100,
     "leaning_back":   55,
+    "leaning_left":   55,
+    "leaning_right":  55,
     "crossed_arms":   40,
     "slouching":      30,
     "looking_down":   20,
