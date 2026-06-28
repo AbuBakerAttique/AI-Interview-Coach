@@ -1,4 +1,7 @@
 # AI Interview Coach 🎯
+
+[Live Demo](https://ai-interview-coach-demo.streamlit.app/)
+
 <p align="center">
   <img src="assets/arch_diagram.png" width="49%"/>
   <img src="assets/flow_diagram.png" width="49%"/>
