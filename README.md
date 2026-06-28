@@ -130,7 +130,7 @@ source venv/bin/activate
 
 ### 3. Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-ml.txt
 pip install mediapipe==0.10.9
 ```
 
@@ -164,6 +164,27 @@ python src/inference/real_time_analyzer.py
 **Controls:**
 - `SPACE` — Start / stop recording session
 - `Q` — Quit and print final report
+
+---
+
+## Streamlit Deployment
+
+This repository includes a Streamlit-ready hosted showcase entry point:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+For Streamlit Community Cloud:
+
+| Setting | Value |
+|---|---|
+| Main file path | `streamlit_app.py` |
+| Python version | `3.11` |
+| Dependencies | `requirements.txt` |
+
+`requirements.txt` is intentionally lightweight for hosted deployment. Use
+`requirements-ml.txt` for local model training and native webcam/microphone inference.
 
 ---
 

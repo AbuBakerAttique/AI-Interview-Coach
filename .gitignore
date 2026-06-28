@@ -8,6 +8,8 @@ saved_models/
 
 # Python environment
 venv/
+.venv/
+.venv*/
 __pycache__/
 *.pyc
 *.pyo
