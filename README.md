@@ -175,6 +175,11 @@ This repository includes a Streamlit-ready hosted showcase entry point:
 streamlit run streamlit_app.py
 ```
 
+The deployed app includes a **Model Test Lab** where visitors can upload a face
+image and run the trained facial-expression model from
+`saved_models/facial_expression/face_model.pth`. The saved speech, face, and
+posture PyTorch weights are included in `saved_models/`.
+
 For Streamlit Community Cloud:
 
 | Setting | Value |

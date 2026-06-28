@@ -1,2 +1,5 @@
 # Streamlit Community Cloud dependencies
+numpy>=1.24.0
+pillow>=10.0.0
 streamlit>=1.36.0
+torch>=2.0.0

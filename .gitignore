@@ -3,8 +3,15 @@ data/raw/
 data/processed/
 data/collected/
 
-# Trained model weights - too large for GitHub
+# Keep only the deployable trained PyTorch weights in GitHub
 saved_models/
+!saved_models/
+!saved_models/facial_expression/
+!saved_models/facial_expression/face_model.pth
+!saved_models/posture_scorer/
+!saved_models/posture_scorer/posture_model.pth
+!saved_models/speech_confidence/
+!saved_models/speech_confidence/speech_model.pth
 
 # Python environment
 venv/
