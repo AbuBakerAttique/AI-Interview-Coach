@@ -1,0 +1,109 @@
+
+<h2 class="sr-only">AI Interview Coach live interface showing webcam with MediaPipe pose skeleton and real-time scores</h2>
+
+<style>
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+.rec-dot { animation: blink 1.4s ease-in-out infinite; }
+</style>
+
+<div style="border-radius:12px;overflow:hidden;border:0.5px solid var(--color-border-tertiary);">
+
+  <!-- Mac-style title bar -->
+  <div style="background:#1c1c1e;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="display:flex;gap:7px;">
+        <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.5);font-family:'Courier New',monospace;letter-spacing:0.5px;">AI Interview Coach — Real-Time Analysis</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;">
+      <div class="rec-dot" style="width:9px;height:9px;border-radius:50%;background:#ef4444;"></div>
+      <span style="font-size:12px;color:#ef4444;font-family:'Courier New',monospace;">REC  00:02:34</span>
+    </div>
+  </div>
+
+  <!-- Camera feed -->
+  <div style="position:relative;background:#0d1117;height:400px;overflow:hidden;">
+
+    <svg width="680" height="400" style="position:absolute;top:0;left:0;" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Subtle person silhouette -->
+      <ellipse cx="340" cy="82" rx="38" ry="44" fill="#141d2b"/>
+      <ellipse cx="340" cy="230" rx="90" ry="100" fill="#141d2b"/>
+
+      <!-- Skeleton connections -->
+      <line x1="340" y1="82" x2="278" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="340" y1="82" x2="402" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="278" y1="150" x2="402" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="278" y1="150" x2="248" y2="212" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="248" y1="212" x2="232" y2="268" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="402" y1="150" x2="432" y2="212" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="432" y1="212" x2="450" y2="268" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="278" y1="150" x2="296" y2="270" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="402" y1="150" x2="384" y2="270" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="296" y1="270" x2="384" y2="270" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="296" y1="270" x2="288" y2="350" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+      <line x1="384" y1="270" x2="392" y2="350" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+
+      <!-- Cyan joint dots (MediaPipe style) -->
+      <circle cx="340" cy="82" r="5" fill="#22d3ee"/>
+      <circle cx="278" cy="150" r="5" fill="#22d3ee"/>
+      <circle cx="402" cy="150" r="5" fill="#22d3ee"/>
+      <circle cx="248" cy="212" r="5" fill="#22d3ee"/>
+      <circle cx="432" cy="212" r="5" fill="#22d3ee"/>
+      <circle cx="232" cy="268" r="5" fill="#22d3ee"/>
+      <circle cx="450" cy="268" r="5" fill="#22d3ee"/>
+      <circle cx="296" cy="270" r="5" fill="#22d3ee"/>
+      <circle cx="384" cy="270" r="5" fill="#22d3ee"/>
+      <circle cx="288" cy="350" r="5" fill="#22d3ee"/>
+      <circle cx="392" cy="350" r="5" fill="#22d3ee"/>
+
+      <!-- Face detection box -->
+      <rect x="294" y="34" width="92" height="95" rx="2" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <line x1="294" y1="34" x2="314" y2="34" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="294" y1="34" x2="294" y2="54" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="386" y1="34" x2="366" y2="34" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="386" y1="34" x2="386" y2="54" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="294" y1="129" x2="314" y2="129" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="294" y1="129" x2="294" y2="109" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="386" y1="129" x2="366" y2="129" stroke="#4ade80" stroke-width="3.5"/>
+      <line x1="386" y1="129" x2="386" y2="109" stroke="#4ade80" stroke-width="3.5"/>
+
+      <!-- Face label -->
+      <rect x="294" y="134" width="92" height="17" rx="2" fill="#4ade80"/>
+      <text x="340" y="146" text-anchor="middle" fill="#14532d" font-size="11" font-family="'Courier New',monospace">Confident</text>
+
+      <!-- Viewfinder corners -->
+      <polyline points="18,44 18,18 44,18" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+      <polyline points="636,18 662,18 662,44" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+      <polyline points="18,356 18,382 44,382" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+      <polyline points="636,382 662,382 662,356" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+
+    </svg>
+
+    <!-- Score overlay panel -->
+    <div style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.72);border-radius:8px;padding:12px 16px;min-width:216px;">
+      <div style="color:#4ade80;font-size:12.5px;margin-bottom:8px;font-family:'Courier New',monospace;">Speech:  <span style="font-weight:500;">Confident</span></div>
+      <div style="color:#fb923c;font-size:12.5px;margin-bottom:8px;font-family:'Courier New',monospace;">Face:    <span style="font-weight:500;">Neutral</span></div>
+      <div style="color:#4ade80;font-size:12.5px;margin-bottom:8px;font-family:'Courier New',monospace;">Posture: <span style="font-weight:500;">good_posture</span></div>
+      <div style="color:#4ade80;font-size:12.5px;margin-bottom:8px;font-family:'Courier New',monospace;">Eye:     <span style="font-weight:500;">72/100</span></div>
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:6px;padding-top:8px;color:#fde047;font-size:12.5px;font-family:'Courier New',monospace;">Session: 02:34</div>
+    </div>
+
+    <!-- Final score card -->
+    <div style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,0.72);border-radius:10px;padding:14px 20px;text-align:center;min-width:110px;">
+      <div style="color:rgba(255,255,255,0.45);font-size:10px;letter-spacing:1.5px;font-family:'Courier New',monospace;margin-bottom:6px;">FINAL SCORE</div>
+      <div style="color:#ffffff;font-size:30px;line-height:1;font-family:'Courier New',monospace;">78.4</div>
+      <div style="color:rgba(255,255,255,0.35);font-size:11px;font-family:monospace;margin-bottom:10px;">/100</div>
+      <div style="background:#818cf8;border-radius:6px;padding:4px 0;color:#fff;font-size:15px;font-family:'Courier New',monospace;letter-spacing:1px;">Grade B</div>
+    </div>
+
+    <!-- Controls -->
+    <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.3);font-size:11px;font-family:'Courier New',monospace;">
+      SPACE: Start/Stop  |  Q: Quit &amp; Report
+    </div>
+
+  </div>
+</div>
