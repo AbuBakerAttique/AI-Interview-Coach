@@ -6,13 +6,13 @@
   <img src="assets/arch_diagram.png" width="49%"/>
   <img src="assets/flow_diagram.png" width="49%"/>
 </p>
-> A real-time, multi-modal AI system that analyzes interview performance using four custom-trained deep learning models — evaluating speech confidence, facial expressions, body posture, and eye contact simultaneously.
+> A real-time, multi-modal AI system that analyzes interview performance using three custom-trained deep learning models plus a rule-based eye-contact module — evaluating speech confidence, facial expressions, body posture, and eye contact simultaneously.
 
 ---
 
 ## Overview
 
-AI Interview Coach is a production-level computer vision and machine learning system built entirely from scratch. It processes live webcam and microphone input, runs four independent deep learning models in parallel, and produces a final interview confidence score with actionable feedback — all in real time.
+AI Interview Coach is a production-level computer vision and machine learning system built entirely from scratch. It processes live webcam and microphone input, runs three independent deep learning models alongside a rule-based eye-contact module, and produces a final interview confidence score with actionable feedback — all in real time.
 
 This project demonstrates end-to-end AI engineering: from raw dataset processing and model architecture design, through training and evaluation, to real-time multi-modal inference and deployment.
 
@@ -37,7 +37,7 @@ This project demonstrates end-to-end AI engineering: from raw dataset processing
 | Speech Confidence | RAVDESS | 2,880 audio files | CNN + LSTM (scratch) | **93.40%** |
 | Facial Expression | FER2013 | 28,821 images | Custom CNN (scratch) | **75.54%** |
 | Posture Scorer | MultiPosture | 4,794 samples | Neural Network (scratch) | **97.29%** |
-| Eye Contact | MediaPipe Face Mesh | — | Geometric inference | Rule-based |
+| Eye Contact | — (no training data) | — | OpenCV Haar cascades + geometric rules | Rule-based |
 
 > **Note on Face Model:** 75.54% on FER2013 is a competitive result. FER2013 is widely considered one of the most challenging facial expression datasets — top published papers achieve 65–75% on the same benchmark. Human-level accuracy on FER2013 is approximately 65%.
 
@@ -45,7 +45,7 @@ This project demonstrates end-to-end AI engineering: from raw dataset processing
 
 ## Key Features
 
-- **4 custom deep learning models** — all architectures designed and trained from scratch, no pretrained weights
+- **3 custom deep learning models + rule-based eye contact** — speech, face, and posture networks designed and trained from scratch with no pretrained weights; eye contact is scored with OpenCV Haar cascades and geometric rules
 - **Real-time multi-modal inference** — all models run simultaneously on live webcam and microphone input
 - **Multi-dataset pipeline** — audio (RAVDESS), image (FER2013), and landmark (MultiPosture) datasets processed end-to-end
 - **Score fusion layer** — weighted combination of all model outputs into a single interpretable score
